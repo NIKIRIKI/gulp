@@ -1,0 +1,87 @@
+const { src, dest, watch, parallel, series } = require("gulp");
+const scss = require("gulp-sass")(require("sass"));
+const concat = require("gulp-concat");
+const autoprefixer = require("gulp-autoprefixer");
+const cleanCSS = require("gulp-clean-css");
+const cleanJS = require("gulp-uglify-es").default;
+const browserSync = require("browser-sync").create();
+const imagemin = require("gulp-imagemin");
+const cache = require("gulp-cache");
+const webp = require("gulp-webp");
+const clean = require("gulp-clean");
+
+function styles() {
+  return src("app/scss/style.scss")
+    .pipe(scss())
+    .pipe(
+      autoprefixer({
+        cascade: false,
+        overrideBrowserslist: ["last 80 versions"],
+      })
+    )
+    .pipe(cleanCSS())
+    .pipe(concat("style.min.css"))
+    .pipe(dest("app/css/"))
+    .pipe(browserSync.stream());
+}
+
+function scripts() {
+  return src(["app/js/*.js", "!app/js/main.min.js"])
+    .pipe(cleanJS())
+    .pipe(concat("main.min.js"))
+    .pipe(dest("app/js/"))
+    .pipe(browserSync.stream());
+}
+
+function images() {
+  return src("app/img/**/*.*")
+    .pipe(
+      cache(
+        imagemin({
+          interlaced: true,
+        })
+      )
+    )
+    .pipe(webp())
+    .pipe(dest("app/img/"));
+}
+
+function watching() {
+  watch(["app/scss/style.scss"], styles);
+  watch(["app/js/main.js"], scripts);
+  watch(["app/img/**/*.*"], images);
+  watch(["app/**/*.html"]).on("change", browserSync.reload);
+}
+
+function browsersync() {
+  browserSync.init({
+    server: {
+      baseDir: "app/",
+    },
+  });
+}
+
+function building() {
+  return src(
+    [
+      "app/css/style.min.css",
+      "app/js/main.min.js",
+      "app/**/*.html",
+      "app/img/**/*.*",
+    ],
+    { base: "app" }
+  ).pipe(dest("public"));
+}
+
+function cleanPublic() {
+  return src("public").pipe(clean());
+}
+
+exports.styles = styles;
+exports.images = images;
+exports.scripts = scripts;
+exports.watching = watching;
+exports.browsersync = browsersync;
+exports.build = series(cleanPublic, building);
+
+exports.default = parallel(styles, scripts, browsersync, watching);
