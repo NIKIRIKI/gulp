@@ -46,6 +46,22 @@ function images() {
     .pipe(dest("app/img/"));
 }
 
+function cleanImagesApp() {
+  return src("app/img/").pipe(clean()).pipe(dest("app/img"));
+}
+
+function cleanCssApp() {
+  return src("app/css/").pipe(clean()).pipe(dest("app/css"));
+}
+
+function cleanJsApp() {
+  return src("app/js/").pipe(clean()).pipe(dest("app/js"));
+}
+
+function cleanScssApp() {
+  return src("app/scss/").pipe(clean()).pipe(dest("app/scss"));
+}
+
 function watching() {
   watch(["app/scss/style.scss"], styles);
   watch(["app/js/main.js"], scripts);
@@ -74,7 +90,7 @@ function building() {
 }
 
 function cleanPublic() {
-  return src("public").pipe(clean());
+  return src("public/").pipe(clean()).pipe(dest("public"));
 }
 
 exports.styles = styles;
@@ -83,5 +99,12 @@ exports.scripts = scripts;
 exports.watching = watching;
 exports.browsersync = browsersync;
 exports.build = series(cleanPublic, building);
-
+exports.cleanImages = cleanImagesApp;
+exports.cleanPublic = cleanPublic;
+exports.cleanApp = series(
+  cleanImagesApp,
+  cleanCssApp,
+  cleanJsApp,
+  cleanScssApp
+);
 exports.default = parallel(styles, scripts, browsersync, watching);
