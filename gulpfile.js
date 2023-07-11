@@ -10,6 +10,7 @@ const cache = require("gulp-cache");
 const webp = require("gulp-webp");
 const clean = require("gulp-clean");
 
+// Обработка стилей
 function styles() {
   return src("app/scss/style.scss")
     .pipe(scss())
@@ -25,6 +26,7 @@ function styles() {
     .pipe(browserSync.stream());
 }
 
+// Обработка скриптов
 function scripts() {
   return src(["app/js/*.js", "!app/js/main.min.js"])
     .pipe(cleanJS())
@@ -33,6 +35,7 @@ function scripts() {
     .pipe(browserSync.stream());
 }
 
+// Обработка изображений
 function images() {
   return src("app/img/**/*.*")
     .pipe(
@@ -46,22 +49,32 @@ function images() {
     .pipe(dest("app/img/"));
 }
 
+// Очистка директории с изображениями в папке app
 function cleanImagesApp() {
-  return src("app/img/").pipe(clean()).pipe(dest("app/img"));
+  return cleanDirectory("app/img/");
 }
 
+// Очистка директории с CSS-файлами в папке app
 function cleanCssApp() {
-  return src("app/css/").pipe(clean()).pipe(dest("app/css"));
+  return cleanDirectory("app/css/");
 }
 
+// Очистка директории с JS-файлами в папке app
 function cleanJsApp() {
-  return src("app/js/").pipe(clean()).pipe(dest("app/js"));
+  return cleanDirectory("app/js/");
 }
 
+// Очистка директории с SCSS-файлами в папке app
 function cleanScssApp() {
-  return src("app/scss/").pipe(clean()).pipe(dest("app/scss"));
+  return cleanDirectory("app/scss/");
 }
 
+// Функция для очистки директории
+function cleanDirectory(directory) {
+  return src(directory).pipe(clean()).pipe(dest(directory));
+}
+
+// Отслеживание изменений в файлах
 function watching() {
   watch(["app/scss/style.scss"], styles);
   watch(["app/js/main.js"], scripts);
@@ -69,6 +82,7 @@ function watching() {
   watch(["app/**/*.html"]).on("change", browserSync.reload);
 }
 
+// Запуск локального сервера для разработки
 function browsersync() {
   browserSync.init({
     server: {
@@ -77,6 +91,7 @@ function browsersync() {
   });
 }
 
+// Сборка проекта для публикации
 function building() {
   return src(
     [
@@ -89,8 +104,9 @@ function building() {
   ).pipe(dest("public"));
 }
 
+// Очистка директории public перед сборкой проекта
 function cleanPublic() {
-  return src("public/").pipe(clean()).pipe(dest("public"));
+  return cleanDirectory("public/");
 }
 
 exports.styles = styles;
