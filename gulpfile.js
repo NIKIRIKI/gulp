@@ -16,6 +16,13 @@ const svgSprite = require("gulp-svg-sprite");
 const fonter = require("gulp-fonter");
 const ttf2woff2 = require("gulp-ttf2woff2");
 const include = require("gulp-include");
+const babel = require("gulp-babel");
+const avifWebpHTML = require("gulp-avif-webp-html");
+const gutil = require("gulp-util");
+
+function html() {
+  return src("app/**/*.html").pipe(avifWebpHTML()).pipe(dest("public/"));
+}
 
 function pages() {
   return src("app/pages/*.html")
@@ -83,6 +90,7 @@ function fonts() {
       })
     )
     .pipe(src("app/fonts/dist/**/*.ttf"))
+
     .pipe(ttf2woff2())
     .pipe(dest("app/fonts/dist/"));
 }
@@ -106,6 +114,11 @@ function styles() {
 // Обработка скриптов
 function scripts() {
   return src(["app/js/*.js", "!app/js/main.min.js"])
+    .pipe(
+      babel({
+        presets: ["@babel/env"],
+      })
+    )
     .pipe(cleanJS())
     .pipe(concat("main.min.js"))
     .pipe(dest("app/js/"))
@@ -118,9 +131,11 @@ function images() {
     .pipe(newer("app/img/dist"))
     .pipe(avif({ quality: 50 }))
     .pipe(src(["app/img/src/**/*.*", "!app/img/src/**/*.svg"]))
+
     .pipe(newer("app/img/dist"))
     .pipe(webp())
     .pipe(src(["app/img/src/**/*.*", "!app/img/src/**/*.svg"]))
+
     .pipe(newer("app/img/dist"))
     .pipe(imagemin())
     .pipe(dest("app/img/dist/"));
@@ -185,7 +200,7 @@ function watching() {
   watch(["app/components/*", "app/pages/*"], pages);
   watch(["app/img/src"], images);
   watch(["app/fonts/src"], fonts);
-  watch(["app/**/*.html"]).on("change", browserSync.reload);
+  watch(["app/**/*.html"], html).on("change", browserSync.reload);
 }
 
 // Сборка проекта для публикации
@@ -222,3 +237,4 @@ exports.start = start;
 exports.sprite = sprite;
 exports.fonts = fonts;
 exports.pages = pages;
+exports.html = html;
