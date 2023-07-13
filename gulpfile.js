@@ -66,6 +66,12 @@ function start() {
   fs.writeFile("app/scss/base/reset.scss", "", (err) => {
     if (err) throw err;
   });
+  fs.writeFile("app/scss/base/vars.scss", "", (err) => {
+    if (err) throw err;
+  });
+  fs.writeFile("app/scss/base/base.scss", "", (err) => {
+    if (err) throw err;
+  });
 }
 
 // Обработка спрайтов
