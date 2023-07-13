@@ -21,7 +21,7 @@ const avifWebpHTML = require("gulp-avif-webp-html");
 const gutil = require("gulp-util");
 
 function html() {
-  return src("app/**/*.html").pipe(avifWebpHTML()).pipe(dest("public/"));
+  return src("app/*.html").pipe(avifWebpHTML()).pipe(dest("app/"));
 }
 
 function pages() {
@@ -44,13 +44,13 @@ function start() {
       makeDir("app/css"),
       makeDir("app/img"),
       makeDir("app/img/src"),
-      makeDir("app/img/dist"),
       makeDir("app/js"),
       makeDir("app/scss"),
+      makeDir("app/scss/base"),
+      makeDir("app/scss/blocks"),
       makeDir("app/pages"),
       makeDir("app/fonts"),
       makeDir("app/fonts/src"),
-      makeDir("app/fonts/dist"),
       makeDir("public"),
     ]);
   })();
@@ -63,11 +63,14 @@ function start() {
   fs.writeFile("app/scss/style.scss", "", (err) => {
     if (err) throw err;
   });
+  fs.writeFile("app/scss/base/reset.scss", "", (err) => {
+    if (err) throw err;
+  });
 }
 
 // Обработка спрайтов
 function sprite() {
-  return src("app/img/dist/*.svg")
+  return src("app/img/src/*.svg")
     .pipe(
       svgSprite({
         mode: {
@@ -78,7 +81,7 @@ function sprite() {
         },
       })
     )
-    .pipe(dest("app/img/dist"));
+    .pipe(dest("app/img/"));
 }
 
 // Обработка шрифтов
@@ -90,9 +93,8 @@ function fonts() {
       })
     )
     .pipe(src("app/fonts/dist/**/*.ttf"))
-
     .pipe(ttf2woff2())
-    .pipe(dest("app/fonts/dist/"));
+    .pipe(dest("app/fonts/"));
 }
 
 // Обработка стилей
@@ -128,17 +130,15 @@ function scripts() {
 // Обработка изображений
 function images() {
   return src(["app/img/src/**/*.*", "!app/img/src/**/*.svg"])
-    .pipe(newer("app/img/dist"))
+    .pipe(newer("app/img/"))
     .pipe(avif({ quality: 50 }))
     .pipe(src(["app/img/src/**/*.*", "!app/img/src/**/*.svg"]))
-
-    .pipe(newer("app/img/dist"))
+    .pipe(newer("app/img/"))
     .pipe(webp())
     .pipe(src(["app/img/src/**/*.*", "!app/img/src/**/*.svg"]))
-
-    .pipe(newer("app/img/dist"))
+    .pipe(newer("app/img/"))
     .pipe(imagemin())
-    .pipe(dest("app/img/dist/"));
+    .pipe(dest("app/img/"));
 }
 
 // Конвертация изображения в формат webp
@@ -198,6 +198,7 @@ function watching() {
   watch(["app/scss/style.scss"], styles);
   watch(["app/js/main.js"], scripts);
   watch(["app/components/*", "app/pages/*"], pages);
+  watch(["app/pages/**/*.html"], html);
   watch(["app/img/src"], images);
   watch(["app/fonts/src"], fonts);
   watch(["app/**/*.html"], html).on("change", browserSync.reload);
@@ -210,9 +211,12 @@ function building() {
       "app/css/style.min.css",
       "app/js/main.min.js",
       "app/**/*.html",
-      "app/img/dist",
+      "!app/pages/**/*.*",
+      "app/fonts/**/*.*",
+      "!app/fonts/src/**/*.*",
+      "app/img/*",
       "app/fonts/dist/**/*.*",
-      "!app/img/dist/**/*.svg",
+      "app/img/dist/**/*.svg",
       "app/img/dist/**/sprite.svg",
     ],
     { base: "app" }
