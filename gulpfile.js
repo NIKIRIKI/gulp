@@ -21,7 +21,7 @@ const avifWebpHTML = require("gulp-avif-webp-html");
 const gutil = require("gulp-util");
 
 function html() {
-  return src("app/*.html").pipe(avifWebpHTML()).pipe(dest("app/"));
+  return src("app/*.html").pipe(newer("app/")).pipe(avifWebpHTML()).pipe(dest("app/"));
 }
 
 function pages() {
