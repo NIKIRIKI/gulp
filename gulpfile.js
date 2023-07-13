@@ -21,7 +21,10 @@ const avifWebpHTML = require("gulp-avif-webp-html");
 const gutil = require("gulp-util");
 
 function html() {
-  return src("app/*.html").pipe(newer("app/")).pipe(avifWebpHTML()).pipe(dest("app/"));
+  return src("app/*.html")
+    .pipe(newer("app/"))
+    .pipe(avifWebpHTML())
+    .pipe(dest("app/"));
 }
 
 function pages() {
@@ -201,13 +204,22 @@ function browsersync() {
 
 // Отслеживание изменений в файлах
 function watching() {
-  watch(["app/scss/style.scss"], styles);
+  watch(
+    [
+      "app/scss/style.scss",
+      "app/scss/base/**/*.scss",
+      "app/scss/blocks/**/*.scss",
+    ],
+    styles
+  );
   watch(["app/js/main.js"], scripts);
   watch(["app/components/*", "app/pages/*"], pages);
-  watch(["app/pages/**/*.html"], html);
   watch(["app/img/src"], images);
   watch(["app/fonts/src"], fonts);
-  watch(["app/**/*.html"], html).on("change", browserSync.reload);
+  watch(["app/**/*.html", "app/pages/**/*.html"], html).on(
+    "change",
+    browserSync.reload
+  );
 }
 
 // Сборка проекта для публикации
